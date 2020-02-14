@@ -41,6 +41,8 @@ public class TransactionalStackLevel1Lock<T extends Object> {
         }
     }
 
+
+
     public void begin() {
         this.lock();
         Stack<T> innerStack = new Stack<>();
@@ -104,6 +106,4 @@ public class TransactionalStackLevel1Lock<T extends Object> {
             this.lockFlag.unlock();
     }
     //endregion
-
-
 }
