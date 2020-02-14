@@ -10,7 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * throws IllegalStateException if internal state and operation conflict
  *
  */
-public class Stack<T extends Object> {
+public class LockStack<T extends Object> {
 
     //fields
     private Node head;
@@ -21,11 +21,11 @@ public class Stack<T extends Object> {
     private ReentrantLock lockFlag= new ReentrantLock();
 
     //region constructure
-    public Stack(){
+    public LockStack(){
         this.enableConcurrency=true;
     }
 
-    public Stack(boolean concurrent){
+    public LockStack(boolean concurrent){
          this.enableConcurrency=concurrent;
     }
     // endregion
@@ -104,8 +104,8 @@ public class Stack<T extends Object> {
     //endregion
 
     //region external utility functions
-    public Stack<T> reverseOrder(){
-        Stack reverseStack= new Stack<>();
+    public LockStack<T> reverseOrder(){
+        LockStack reverseStack= new LockStack<>();
         this.lock(true);
         while (!this.isEmptyNoLock())
         {
@@ -115,7 +115,7 @@ public class Stack<T extends Object> {
         return reverseStack;
     }
 
-    public   void merge(Stack<T> stack){
+    public   void merge(LockStack<T> stack){
         this.lock(true);
         while (!stack.isEmpty())
         {

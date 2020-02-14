@@ -3,6 +3,14 @@ package com.murat.demo.data.structures;
 public class Stack<T extends Object> {
     private Node head;
     private int count;
+    private String name ;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+    public String getName() {
+        return name;
+    }
 
     public void push(T data) {
         Node node = new Node(data);

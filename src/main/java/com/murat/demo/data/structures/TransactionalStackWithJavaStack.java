@@ -1,12 +1,7 @@
-package com.murat.demo.data.structures.concurency;
-
-import java.util.Collections;
-
-import java.util.concurrent.locks.ReentrantLock;
+package com.murat.demo.data.structures;
 
 public class TransactionalStackWithJavaStack<T extends Object> {
 
-    private ReentrantLock lockFlag = new ReentrantLock();
 
     private java.util.Stack<T> mainStack;
     private java.util.Stack<java.util.Stack<T>> transactionStack;
@@ -16,115 +11,75 @@ public class TransactionalStackWithJavaStack<T extends Object> {
         this.transactionStack = new java.util.Stack<>();
     }
 
-    //region stack operations
+    //region stack methods
     public void push(T data) {
-        this.lock();
         if (!this.transactionStack.isEmpty()) {
             this.transactionStack.peek().push(data);
         } else {
             this.mainStack.push(data);
         }
-        this.unlock();
     }
 
     public T pop() {
-        try {
-            this.lock();
-            if (!this.transactionStack.isEmpty()) {
-                return this.transactionStack.peek().pop();
-            }
-            return this.mainStack.pop();
-        } finally {
-            this.unlock();
+        if (!this.transactionStack.isEmpty()) {
+            return this.transactionStack.peek().pop();
         }
+        return this.mainStack.pop();
     }
 
     public T peek() {
-        try {
-            this.lock();
-            if (!this.transactionStack.isEmpty()) {
-                return this.transactionStack.peek().peek();
-            }
-            return this.mainStack.peek();
-        } finally {
-            this.unlock();
+
+        if (!this.transactionStack.isEmpty()) {
+            return this.transactionStack.peek().peek();
         }
+        return this.mainStack.peek();
+
     }
 
     //endregion
 
     //region transactional methods
     public void begin() {
-        this.lock();
         java.util.Stack<T> innerStack = new java.util.Stack<>();
         this.transactionStack.push(innerStack);
-        this.unlock();
+
     }
 
     public boolean rollback() {
-        try {
-            this.lock();
-            if (this.transactionStack.isEmpty()) return false;
-            this.transactionStack.pop();
-            return true;
-        } finally {
-            this.unlock();
-        }
+
+        if (this.transactionStack.isEmpty()) return false;
+        this.transactionStack.pop();
+        return true;
+
     }
 
     public boolean commit() {
-        try {
-            this.lock();
-            if (transactionStack.isEmpty()) return false;
-            java.util.Stack<T> innerTransaction = transactionStack.pop();
-            if (!innerTransaction.isEmpty()) {
-                java.util.Stack<T> parentTrasaction = transactionStack.isEmpty() ? mainStack : transactionStack.peek();
-                innerTransaction.sort(Collections.reverseOrder());
-                parentTrasaction.addAll(innerTransaction);
-            }
-            return true;
-        } finally {
-            this.unlock();
+        if (transactionStack.isEmpty()) return false;
+        java.util.Stack<T> innerTransaction = transactionStack.pop();
+        if (!innerTransaction.isEmpty()) {
+            java.util.Stack<T> parentTrasaction = transactionStack.isEmpty() ? mainStack : transactionStack.peek();
+           // innerTransaction.sort(Collections.reverseOrder());
+            parentTrasaction.addAll(innerTransaction);
         }
+        return true;
     }
 
     //endregion
 
-    //region utilities methods
-    public boolean isActive(){
-        this.lock();
-        boolean result= transactionStack.isEmpty() ? false :true;
-        this.unlock();
+    //region utility methods
+    public boolean isActive() {
+        boolean result = transactionStack.isEmpty() ? false : true;
+
         return result;
     }
 
-    public boolean isEmpty(){
-        this.lock();
-        boolean result=this.mainStack.isEmpty();
-        this.unlock();
-        return result;
-    }
-
-
-    public boolean isCurrentEmpty(){
+    public boolean isCurrentEmpty() {
         if (!this.transactionStack.isEmpty()) {
-             return this.transactionStack.peek().peek();
+            return this.transactionStack.peek().isEmpty();
         }
-        return this.mainStack.peek();
+        return this.mainStack.isEmpty();
     }
 
-
-
-
-    //endregion
-
-    //region  lock management
-    private void lock(){
-            this.lockFlag.lock();
-    }
-    private void unlock() {
-            this.lockFlag.unlock();
-    }
     //endregion
 
 

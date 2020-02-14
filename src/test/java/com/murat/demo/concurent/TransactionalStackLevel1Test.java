@@ -1,4 +1,4 @@
-package com.murat.demo;
+package com.murat.demo.concurent;
 
 import com.murat.demo.data.structures.TransactionalStack;
 import com.murat.demo.data.structures.concurency.TransactionalStackLevel1Lock;
